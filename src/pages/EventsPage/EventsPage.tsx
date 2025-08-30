@@ -33,6 +33,7 @@ export default function EventsPage() {
     useRef(undefined);
 
   useEffect(() => {
+    setIsLoading(true);
     lastDoc.current = undefined;
     hasMoreEventsToLoad.current = undefined;
 
@@ -46,8 +47,13 @@ export default function EventsPage() {
             (a, b) => a.date.getTime() - b.date.getTime()
           )
         );
+
+        setIsLoading(false);
       },
-      (err) => showErrorAlert(err),
+      (err) => {
+        showErrorAlert(err);
+        setIsLoading(false);
+      },
       filter,
       lastDoc.current
     );
