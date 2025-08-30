@@ -33,6 +33,9 @@ export default function EventsPage() {
     useRef(undefined);
 
   useEffect(() => {
+    lastDoc.current = undefined;
+    hasMoreEventsToLoad.current = undefined;
+
     const unsubscribe = eventsServices.subscribeToEvents(
       (paginatedResult) => {
         lastDoc.current = paginatedResult.lastDoc;
