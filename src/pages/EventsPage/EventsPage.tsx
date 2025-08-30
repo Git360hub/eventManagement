@@ -23,7 +23,7 @@ export default function EventsPage() {
 
   const [events, setEvents] = useState<EventModel[]>([]);
   const [filter, setFilter] = useState<DateFilterType | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const lastDoc: React.RefObject<
     DocumentSnapshot<DocumentData, DocumentData> | undefined
@@ -33,7 +33,6 @@ export default function EventsPage() {
     useRef(undefined);
 
   useEffect(() => {
-    setIsLoading(true);
     lastDoc.current = undefined;
     hasMoreEventsToLoad.current = undefined;
 
