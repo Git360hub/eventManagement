@@ -23,7 +23,7 @@ export default function EventsPage() {
 
   const [events, setEvents] = useState<EventModel[]>([]);
   const [filter, setFilter] = useState<DateFilterType | undefined>();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const lastDoc: React.RefObject<
     DocumentSnapshot<DocumentData, DocumentData> | undefined
@@ -33,11 +33,8 @@ export default function EventsPage() {
     useRef(undefined);
 
   useEffect(() => {
-    const getAllEvents = async () => {
-      setIsLoading(true);
-      try {
-        const paginatedResult = await eventsServices.getEvents(filter);
-
+    const unsubscribe = eventsServices.subscribeToEvents(
+      (paginatedResult) => {
         lastDoc.current = paginatedResult.lastDoc;
         hasMoreEventsToLoad.current = paginatedResult.hasMore;
 
@@ -46,14 +43,13 @@ export default function EventsPage() {
             (a, b) => a.date.getTime() - b.date.getTime()
           )
         );
-      } catch (error) {
-        showErrorAlert(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+      },
+      (err) => showErrorAlert(err),
+      filter,
+      lastDoc.current
+    );
 
-    getAllEvents();
+    return () => unsubscribe();
   }, [filter, showErrorAlert]);
 
   const onLoadMoreEventsClickHandler = async () => {
