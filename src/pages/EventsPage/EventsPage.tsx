@@ -12,14 +12,14 @@ import DATE_FILTER_TYPES from "../../constants/dateFiltersTypes";
 import classes from "./EventsPage.module.css";
 import type { DocumentData, DocumentSnapshot } from "firebase/firestore";
 import { getStartOfTheDay } from "../../utils/dateUtils";
-import useAttendanceContext from "../../hooks/useAttendanceContext";
+import attendanceServices from "../../services/attendanceServices";
+import useAuthContext from "../../hooks/useAuthContext";
 
 const END_OF_THE_DAY = getStartOfTheDay();
 
 export default function EventsPage() {
+  const { user } = useAuthContext();
   const { showErrorAlert } = useAlertContext();
-  const { addAttendance, removeAttendance, isAttendingEvent } =
-    useAttendanceContext();
 
   const [events, setEvents] = useState<EventModel[]>([]);
   const [filter, setFilter] = useState<DateFilterType | undefined>();
@@ -85,23 +85,17 @@ export default function EventsPage() {
 
   const onAttendEventClickHandler = async (eventId: string) => {
     try {
-      setIsLoading(true);
-      await addAttendance(eventId);
+      await attendanceServices.addAttendance(user!.id, eventId);
     } catch (error) {
       showErrorAlert(error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const onRemoveEventAttendanceClickHandler = async (eventId: string) => {
     try {
-      setIsLoading(true);
-      await removeAttendance(eventId);
+      await attendanceServices.removeAttendance(user!.id, eventId);
     } catch (error) {
       showErrorAlert(error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -127,7 +121,9 @@ export default function EventsPage() {
       </PageHeader>
       <EventGrid>
         {events.map((e) => {
-          const isCurrentUserAttendingEvent = isAttendingEvent(e.id);
+          const isCurrentUserAttendingEvent = user?.attendingEvents?.includes(
+            e.id
+          );
           return (
             <EventCard
               key={e.id}

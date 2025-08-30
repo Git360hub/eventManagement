@@ -1,4 +1,12 @@
-import { collection, doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  FirestoreError,
+  getDoc,
+  onSnapshot,
+  setDoc,
+  type Unsubscribe,
+} from "firebase/firestore";
 import { database } from "../firebase";
 import type UserDetails from "../models/UserDetails";
 
@@ -22,6 +30,24 @@ const usersServices = {
   ): Promise<void> => {
     const docRef = doc(USERS_COLLECTION, userId);
     return setDoc(docRef, userDetails);
+  },
+  subscribeToUserDetails: (
+    onSuccess: (result: UserDetails | undefined) => void,
+    onError: (error: FirestoreError) => void,
+    userId: string
+  ): Unsubscribe => {
+    const docRef = doc(USERS_COLLECTION, userId);
+    return onSnapshot(
+      docRef,
+      (querySnapshot) => {
+        onSuccess(
+          querySnapshot.exists()
+            ? ({ ...querySnapshot.data() } as UserDetails)
+            : undefined
+        );
+      },
+      onError
+    );
   },
 };
 

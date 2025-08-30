@@ -1,4 +1,9 @@
-import { type PropsWithChildren, useCallback, useState } from "react";
+import {
+  type PropsWithChildren,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import AuthContext from "./AuthContext";
 import {
   createUserWithEmailAndPassword,
@@ -12,6 +17,25 @@ import type UserDetails from "../../models/UserDetails";
 
 const AuthContextProvider = ({ children }: PropsWithChildren) => {
   const [user, setUser] = useState<AppUser | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const unsubscribe = usersServices.subscribeToUserDetails(
+      (result) => {
+        if (!result) {
+          throw new Error("User details not found");
+        }
+        setUser((prev) => ({ ...prev, ...result } as AppUser));
+      },
+      (err) => {
+        throw err;
+      },
+      user!.id
+    );
+
+    return () => unsubscribe();
+  }, [user]);
 
   const login = useCallback(async (email: string, password: string) => {
     const { user } = await signInWithEmailAndPassword(auth, email, password);
