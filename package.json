@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "firebase-emulators": "firebase emulators:start --only firestore,auth"
+    "firebase-emulators": "firebase emulators:start --only firestore,auth,storage"
   },
   "dependencies": {
     "firebase": "^12.1.0",
